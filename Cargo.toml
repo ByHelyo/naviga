@@ -2,12 +2,8 @@
 name = "naviga"
 version = "0.1.0"
 authors = ["Franck Hu <franck.hu@epita.fr>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
-crossterm = "0.21.0"
-
-[dependencies.tui]
-version = "0.16.0"
-default-features = false
-features = ["crossterm"]
+tui = "0.18"
+crossterm = "0.23"
