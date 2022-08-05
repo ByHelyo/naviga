@@ -1,9 +1,15 @@
+pub mod directory;
+
+use directory::Directory;
 use std::error;
+use std::path::PathBuf;
 use tui::backend::Backend;
-use tui::layout::Alignment;
-use tui::style::{Color, Style};
+use tui::layout::{Constraint, Direction, Layout, Rect};
+use tui::style::{Color, Modifier, Style};
 use tui::terminal::Frame;
-use tui::widgets::{Block, Borders, Paragraph};
+use tui::widgets::{Block, List, ListItem};
+
+use std::env;
 
 /// Application result type.
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
@@ -21,19 +27,43 @@ pub enum Action {
 pub struct App {
     /// Is the application running?
     pub running: bool,
-    pub key: Option<Action>,
-}
-
-impl Default for App {
-    fn default() -> Self {
-        Self { running: true, key: None }
-    }
+    pub action: Option<Action>,
+    pub current_directory: Directory,
+    pub previous_directory: Option<Directory>,
+    pub next_directory: Option<Directory>,
 }
 
 impl App {
     /// Constructs a new instance of [`App`].
-    pub fn new() -> Self {
-        Self::default()
+    pub fn new() -> AppResult<Self> {
+        let current_path: PathBuf = env::current_dir()?;
+
+        let current_directory: Directory = Directory::new(&current_path)?;
+
+        let previous_directory: Option<Directory> = match current_path.parent() {
+            Some(path) => Some(Directory::new(&path.to_path_buf())?),
+            None => None,
+        };
+
+        let next_directory: Option<Directory> = if current_directory.entries
+            [current_directory.state.selected().unwrap()]
+        .1
+        .is_dir()
+        {
+            Some(Directory::new(
+                &current_directory.entries[current_directory.state.selected().unwrap()].0,
+            )?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            running: true,
+            action: None,
+            current_directory,
+            previous_directory,
+            next_directory,
+        })
     }
 
     /// Handles the tick event of the terminal.
@@ -46,52 +76,89 @@ impl App {
         // - https://docs.rs/tui/0.16.0/tui/widgets/index.html
         // - https://github.com/fdehau/tui-rs/tree/v0.16.0/examples
 
-        match self.key {
-            Some(Action::Left) => {
-                frame.render_widget(
-                    Paragraph::new("left")
-                        .block(Block::default().borders(Borders::ALL))
-                        .style(Style::default().fg(Color::White).bg(Color::Black))
-                        .alignment(Alignment::Center),
-                    frame.size(),
-                );
-            }
-            Some(Action::Right) => {
-                frame.render_widget(
-                    Paragraph::new("Right")
-                        .block(Block::default().borders(Borders::ALL))
-                        .style(Style::default().fg(Color::White).bg(Color::Black))
-                        .alignment(Alignment::Center),
-                    frame.size(),
-                );
-            }
+        let size = frame.size();
+
+        let chunks = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints(
+                [
+                    Constraint::Percentage(20),
+                    Constraint::Percentage(40),
+                    Constraint::Percentage(40),
+                ]
+                .as_ref(),
+            )
+            .split(size);
+
+        match self.action {
+            Some(Action::Left) => {}
+            Some(Action::Right) => {}
             Some(Action::Up) => {
-                frame.render_widget(
-                    Paragraph::new("Up")
-                        .block(Block::default().borders(Borders::ALL))
-                        .style(Style::default().fg(Color::White).bg(Color::Black))
-                        .alignment(Alignment::Center),
-                    frame.size(),
-                );
+                self.current_directory.previous();
             }
             Some(Action::Down) => {
-                frame.render_widget(
-                    Paragraph::new("Down")
-                        .block(Block::default().borders(Borders::ALL))
-                        .style(Style::default().fg(Color::White).bg(Color::Black))
-                        .alignment(Alignment::Center),
-                    frame.size(),
-                );
+                self.current_directory.next();
             }
-            _ => {
-                frame.render_widget(
-                    Paragraph::new("naviga")
-                        .block(Block::default().borders(Borders::ALL))
-                        .style(Style::default().fg(Color::White).bg(Color::Black))
-                        .alignment(Alignment::Center),
-                    frame.size(),
-                );
-            }
+            _ => {}
         }
+
+        if let Some(directory) = &mut self.previous_directory {
+            App::render_directory(frame, &chunks[0], directory);
+        }
+
+        App::render_directory(frame, &chunks[1], &mut self.current_directory);
+
+        if let Some(directory) = &mut self.next_directory {
+            App::render_directory(frame, &chunks[2], directory);
+        }
+
+        self.action = None;
+    }
+
+    fn render_directory<B: Backend>(
+        frame: &mut Frame<'_, B>,
+        chunk: &Rect,
+        directory: &mut Directory,
+    ) {
+        let items: Vec<ListItem> = directory
+            .entries
+            .iter()
+            .map(|entry| {
+                let file_name = entry.0.file_name().unwrap().to_string_lossy();
+
+                if entry.1.is_dir() {
+                    ListItem::new(file_name).style(
+                        Style::default()
+                            .fg(Color::Blue)
+                            .add_modifier(Modifier::BOLD),
+                    )
+                } else if entry.1.is_symlink() {
+                    ListItem::new(file_name).style(
+                        Style::default()
+                            .fg(Color::Cyan)
+                            .add_modifier(Modifier::BOLD),
+                    )
+                } else {
+                    ListItem::new(file_name).style(
+                        Style::default()
+                            .fg(Color::White)
+                            .add_modifier(Modifier::BOLD),
+                    )
+                }
+            })
+            .collect();
+
+        let current_directory_block = Block::default();
+
+        let list = List::new(items)
+            .block(current_directory_block)
+            .highlight_style(
+                Style::default()
+                    .bg(Color::Blue)
+                    .fg(Color::Black)
+                    .add_modifier(Modifier::BOLD),
+            );
+
+        frame.render_stateful_widget(list, *chunk, &mut directory.state);
     }
 }

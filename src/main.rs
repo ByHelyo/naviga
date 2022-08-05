@@ -1,14 +1,14 @@
-use std::io;
-use tui::backend::CrosstermBackend;
-use tui::Terminal;
 use naviga::app::{App, AppResult};
 use naviga::event::{Event, EventHandler};
 use naviga::handler::handle_key_events;
 use naviga::tui::Tui;
+use std::io;
+use tui::backend::CrosstermBackend;
+use tui::Terminal;
 
 fn main() -> AppResult<()> {
     // Create an application.
-    let mut app = App::new();
+    let mut app = App::new()?;
 
     // Initialize the terminal user interface.
     let backend = CrosstermBackend::new(io::stderr());
