@@ -38,10 +38,25 @@ impl App {
     pub fn new() -> AppResult<Self> {
         let current_path: PathBuf = env::current_dir()?;
 
-        let current_directory: Directory = Directory::new(&current_path)?;
+        let mut current_directory: Directory = Directory::new(&current_path)?;
+        current_directory.state.select(Some(0));
 
         let previous_directory: Option<Directory> = match current_path.parent() {
-            Some(path) => Some(Directory::new(&path.to_path_buf())?),
+            Some(path) => {
+                let mut previous_directory: Directory = Directory::new(&path.to_path_buf())?;
+
+                let mut parent_index: usize = 0;
+
+                for (index, entry) in previous_directory.entries.iter().enumerate() {
+                    if entry.1.is_dir() && entry.0 == current_path {
+                        parent_index = index;
+                    }
+                }
+
+                previous_directory.state.select(Some(parent_index));
+
+                Some(previous_directory)
+            }
             None => None,
         };
 

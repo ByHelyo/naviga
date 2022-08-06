@@ -18,7 +18,7 @@ impl Directory {
         }
 
         let mut state: ListState = ListState::default();
-        state.select(Some(0));
+        state.select(None);
 
         Ok(Directory { state, entries })
     }
