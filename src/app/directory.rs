@@ -4,6 +4,7 @@ use tui::widgets::ListState;
 
 #[derive(Debug)]
 pub struct Directory {
+    pub root: PathBuf,
     pub state: ListState,
     pub entries: Vec<(PathBuf, FileType)>,
 }
@@ -20,7 +21,11 @@ impl Directory {
         let mut state: ListState = ListState::default();
         state.select(None);
 
-        Ok(Directory { state, entries })
+        Ok(Directory {
+            root: dir_path.to_path_buf(),
+            state,
+            entries,
+        })
     }
 
     pub fn next(&mut self) {

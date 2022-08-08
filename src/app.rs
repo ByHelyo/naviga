@@ -1,4 +1,5 @@
 pub mod directory;
+mod utils;
 
 use directory::Directory;
 use std::error;
@@ -28,7 +29,7 @@ pub struct App {
     /// Is the application running?
     pub running: bool,
     pub action: Option<Action>,
-    pub current_directory: Directory,
+    pub current_directory: Option<Directory>,
     pub previous_directory: Option<Directory>,
     pub next_directory: Option<Directory>,
 }
@@ -41,44 +42,18 @@ impl App {
         let mut current_directory: Directory = Directory::new(&current_path)?;
         current_directory.state.select(Some(0));
 
-        let previous_directory: Option<Directory> = match current_path.parent() {
-            Some(path) => {
-                let mut previous_directory: Directory = Directory::new(&path.to_path_buf())?;
-
-                let mut parent_index: usize = 0;
-
-                for (index, entry) in previous_directory.entries.iter().enumerate() {
-                    if entry.1.is_dir() && entry.0 == current_path {
-                        parent_index = index;
-                    }
-                }
-
-                previous_directory.state.select(Some(parent_index));
-
-                Some(previous_directory)
-            }
-            None => None,
-        };
-
-        let next_directory: Option<Directory> = if current_directory.entries
-            [current_directory.state.selected().unwrap()]
-        .1
-        .is_dir()
-        {
-            Some(Directory::new(
-                &current_directory.entries[current_directory.state.selected().unwrap()].0,
-            )?)
-        } else {
-            None
-        };
-
-        Ok(Self {
+        let mut app: App = App {
             running: true,
             action: None,
-            current_directory,
-            previous_directory,
-            next_directory,
-        })
+            current_directory: Some(current_directory),
+            previous_directory: None,
+            next_directory: None,
+        };
+
+        app.build_previous_dir()?;
+        app.build_next_dir()?;
+
+        Ok(app)
     }
 
     /// Handles the tick event of the terminal.
@@ -106,13 +81,22 @@ impl App {
             .split(size);
 
         match self.action {
-            Some(Action::Left) => {}
+            Some(Action::Left) => {
+                if self.previous_directory.is_some() {
+                    self.next_directory = self.current_directory.take();
+                    self.next_directory.as_mut().unwrap().state.select(None);
+
+                    self.current_directory = self.previous_directory.take();
+
+                    self.build_previous_dir();
+                }
+            }
             Some(Action::Right) => {}
             Some(Action::Up) => {
-                self.current_directory.previous();
+                self.current_directory.as_mut().unwrap().previous();
             }
             Some(Action::Down) => {
-                self.current_directory.next();
+                self.current_directory.as_mut().unwrap().next();
             }
             _ => {}
         }
@@ -121,7 +105,7 @@ impl App {
             App::render_directory(frame, &chunks[0], directory);
         }
 
-        App::render_directory(frame, &chunks[1], &mut self.current_directory);
+        App::render_directory(frame, &chunks[1], self.current_directory.as_mut().unwrap());
 
         if let Some(directory) = &mut self.next_directory {
             App::render_directory(frame, &chunks[2], directory);
