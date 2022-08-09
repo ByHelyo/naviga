@@ -33,12 +33,11 @@ pub struct App {
     pub next_directory: Option<Directory>,
 }
 
-impl App {
-    /// Constructs a new instance of [`App`].
-    pub fn new() -> AppResult<Self> {
-        let current_path: PathBuf = env::current_dir()?;
+impl Default for App {
+    fn default() -> Self {
+        let current_path: PathBuf = env::current_dir().unwrap();
 
-        let mut current_directory: Directory = Directory::new(&current_path)?;
+        let mut current_directory: Directory = Directory::new(&current_path).unwrap();
         current_directory.state.select(Some(0));
 
         let mut app: App = App {
@@ -49,17 +48,24 @@ impl App {
             next_directory: None,
         };
 
-        app.build_previous_dir()?;
+        app.build_previous_dir().unwrap();
 
         if let Err(error) = app.build_next_dir() {
             if error.kind() == std::io::ErrorKind::PermissionDenied {
                 app.next_directory = None;
             } else {
-                return Err(Box::new(error));
+                panic!("{}", error);
             }
         };
 
-        Ok(app)
+        app
+    }
+}
+
+impl App {
+    /// Constructs a new instance of [`App`].
+    pub fn new() -> Self {
+        Self::default()
     }
 
     /// Handles the tick event of the terminal.
@@ -94,12 +100,23 @@ impl App {
 
                     self.current_directory = self.previous_directory.take();
 
-                    if let Err(error) = self.build_previous_dir() {
-                        panic!("{}", error);
-                    };
+                    self.build_previous_dir().unwrap();
                 }
             }
-            Some(Action::Right) => {}
+            Some(Action::Right) => {
+                if self.next_directory.is_some() {
+                    self.previous_directory = self.current_directory.take();
+
+                    self.current_directory = self.next_directory.take();
+                    self.current_directory
+                        .as_mut()
+                        .unwrap()
+                        .state
+                        .select(Some(0));
+
+                    self.build_next_dir().unwrap();
+                }
+            }
             Some(Action::Up) => {
                 self.current_directory.as_mut().unwrap().previous();
                 if let Err(error) = self.build_next_dir() {
