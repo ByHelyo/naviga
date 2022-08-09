@@ -2,6 +2,7 @@ pub mod directory;
 mod utils;
 
 use directory::Directory;
+use std::env;
 use std::error;
 use std::path::PathBuf;
 use tui::backend::Backend;
@@ -9,8 +10,6 @@ use tui::layout::{Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Modifier, Style};
 use tui::terminal::Frame;
 use tui::widgets::{Block, List, ListItem};
-
-use std::env;
 
 /// Application result type.
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
@@ -51,7 +50,14 @@ impl App {
         };
 
         app.build_previous_dir()?;
-        app.build_next_dir()?;
+
+        if let Err(error) = app.build_next_dir() {
+            if error.kind() == std::io::ErrorKind::PermissionDenied {
+                app.next_directory = None;
+            } else {
+                return Err(Box::new(error));
+            }
+        };
 
         Ok(app)
     }
@@ -88,15 +94,31 @@ impl App {
 
                     self.current_directory = self.previous_directory.take();
 
-                    self.build_previous_dir();
+                    if let Err(error) = self.build_previous_dir() {
+                        panic!("{}", error);
+                    };
                 }
             }
             Some(Action::Right) => {}
             Some(Action::Up) => {
                 self.current_directory.as_mut().unwrap().previous();
+                if let Err(error) = self.build_next_dir() {
+                    if let std::io::ErrorKind::PermissionDenied = error.kind() {
+                        self.next_directory = None;
+                    } else {
+                        panic!("{}", error);
+                    }
+                }
             }
             Some(Action::Down) => {
                 self.current_directory.as_mut().unwrap().next();
+                if let Err(error) = self.build_next_dir() {
+                    if let std::io::ErrorKind::PermissionDenied = error.kind() {
+                        self.next_directory = None;
+                    } else {
+                        panic!("{}", error);
+                    }
+                }
             }
             _ => {}
         }

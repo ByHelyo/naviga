@@ -1,12 +1,11 @@
 use crate::app::App;
 
 use crate::app::directory::Directory;
-use crate::app::AppResult;
 use std::fs::FileType;
 use std::path::PathBuf;
 
 impl App {
-    pub fn build_previous_dir(&mut self) -> AppResult<()> {
+    pub fn build_previous_dir(&mut self) -> std::io::Result<()> {
         let current_path: &PathBuf = &self.current_directory.as_ref().unwrap().root;
 
         match current_path.parent() {
@@ -44,19 +43,16 @@ impl App {
         Ok(())
     }
 
-    pub fn build_next_dir(&mut self) -> AppResult<()> {
+    pub fn build_next_dir(&mut self) -> std::io::Result<()> {
         let current_directory: &Directory = &self.current_directory.as_ref().unwrap();
         let current_entries: &Vec<(PathBuf, FileType)> =
             &self.current_directory.as_ref().unwrap().entries;
 
-        // Get the selected entry
-        if current_entries[current_directory.state.selected().unwrap()]
-            .1
-            .is_dir()
-        {
-            self.next_directory = Some(Directory::new(
-                &current_directory.entries[current_directory.state.selected().unwrap()].0,
-            )?);
+        let current_entry: &(PathBuf, FileType) =
+            &current_entries[current_directory.state.selected().unwrap()];
+
+        if current_entry.1.is_dir() {
+            self.next_directory = Some(Directory::new(&current_entry.0)?);
         } else {
             self.next_directory = None;
         }

@@ -10,7 +10,7 @@ pub struct Directory {
 }
 
 impl Directory {
-    pub fn new(dir_path: &PathBuf) -> super::AppResult<Self> {
+    pub fn new(dir_path: &PathBuf) -> std::io::Result<Self> {
         let mut entries: Vec<(PathBuf, FileType)> = Vec::new();
 
         for entry in fs::read_dir(dir_path)? {
