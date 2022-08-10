@@ -19,13 +19,24 @@ impl App {
                     self.previous_directory = self.current_directory.take();
 
                     self.current_directory = self.next_directory.take();
-                    self.current_directory
-                        .as_mut()
-                        .unwrap()
-                        .state
-                        .select(Some(0));
 
-                    self.build_next_dir().unwrap();
+                    // if current directory is not empty
+                    // Set the list state index to 0
+                    if self.current_directory.as_ref().unwrap().entries.len() > 0 {
+                        self.current_directory
+                            .as_mut()
+                            .unwrap()
+                            .state
+                            .select(Some(0));
+                    }
+
+                    if let Err(error) = self.build_next_dir() {
+                        if let std::io::ErrorKind::PermissionDenied = error.kind() {
+                            self.next_directory = None;
+                        } else {
+                            panic!("{}", error);
+                        }
+                    }
                 }
             }
             Some(Action::Up) => {

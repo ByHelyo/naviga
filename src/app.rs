@@ -180,7 +180,7 @@ impl App {
                             .fg(Color::Black)
                             .add_modifier(Modifier::BOLD),
                     )
-                    .highlight_symbol(">> ");
+                    .highlight_symbol("> ");
             } else if directory.entries[index].1.is_symlink() {
                 list = List::new(items)
                     .block(current_directory_block)
@@ -190,7 +190,7 @@ impl App {
                             .fg(Color::Black)
                             .add_modifier(Modifier::BOLD),
                     )
-                    .highlight_symbol(">> ");
+                    .highlight_symbol("> ");
             } else {
                 list = List::new(items)
                     .block(current_directory_block)
@@ -200,7 +200,7 @@ impl App {
                             .fg(Color::Black)
                             .add_modifier(Modifier::BOLD),
                     )
-                    .highlight_symbol(">> ");
+                    .highlight_symbol("> ");
             }
         } else {
             list = List::new(items).block(current_directory_block);

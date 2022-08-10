@@ -48,13 +48,15 @@ impl App {
         let current_entries: &Vec<(PathBuf, FileType)> =
             &self.current_directory.as_ref().unwrap().entries;
 
-        let current_entry: &(PathBuf, FileType) =
-            &current_entries[current_directory.state.selected().unwrap()];
+        if current_directory.entries.len() > 0 {
+            let current_entry: &(PathBuf, FileType) =
+                &current_entries[current_directory.state.selected().unwrap()];
 
-        if current_entry.1.is_dir() {
-            self.next_directory = Some(Directory::new(&current_entry.0)?);
-        } else {
-            self.next_directory = None;
+            if current_entry.1.is_dir() {
+                self.next_directory = Some(Directory::new(&current_entry.0)?);
+            } else {
+                self.next_directory = None;
+            }
         }
 
         Ok(())
