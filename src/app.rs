@@ -143,14 +143,40 @@ impl App {
 
         let current_directory_block = Block::default();
 
-        let list = List::new(items)
-            .block(current_directory_block)
-            .highlight_style(
-                Style::default()
-                    .bg(Color::Blue)
-                    .fg(Color::Black)
-                    .add_modifier(Modifier::BOLD),
-            );
+        let list: List;
+
+        if let Some(index) = directory.state.selected() {
+            if directory.entries[index].1.is_dir() {
+                list = List::new(items)
+                    .block(current_directory_block)
+                    .highlight_style(
+                        Style::default()
+                            .bg(Color::Blue)
+                            .fg(Color::Black)
+                            .add_modifier(Modifier::BOLD),
+                    );
+            } else if directory.entries[index].1.is_symlink() {
+                list = List::new(items)
+                    .block(current_directory_block)
+                    .highlight_style(
+                        Style::default()
+                            .bg(Color::Cyan)
+                            .fg(Color::Black)
+                            .add_modifier(Modifier::BOLD),
+                    );
+            } else {
+                list = List::new(items)
+                    .block(current_directory_block)
+                    .highlight_style(
+                        Style::default()
+                            .bg(Color::White)
+                            .fg(Color::Black)
+                            .add_modifier(Modifier::BOLD),
+                    );
+            }
+        } else {
+            list = List::new(items).block(current_directory_block);
+        }
 
         frame.render_stateful_widget(list, *chunk, &mut directory.state);
     }
