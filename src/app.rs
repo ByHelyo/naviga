@@ -10,7 +10,7 @@ use tui::backend::Backend;
 use tui::layout::{Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Modifier, Style};
 use tui::terminal::Frame;
-use tui::widgets::{Block, List, ListItem};
+use tui::widgets::{Block, List, ListItem, Paragraph};
 
 /// Application result type.
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
@@ -79,9 +79,12 @@ impl App {
         // - https://docs.rs/tui/0.16.0/tui/widgets/index.html
         // - https://github.com/fdehau/tui-rs/tree/v0.16.0/examples
 
-        let size = frame.size();
+        let main_chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([Constraint::Length(1), Constraint::Min(1)].as_ref())
+            .split(frame.size());
 
-        let chunks = Layout::default()
+        let directories_chunks = Layout::default()
             .direction(Direction::Horizontal)
             .constraints(
                 [
@@ -91,18 +94,37 @@ impl App {
                 ]
                 .as_ref(),
             )
-            .split(size);
+            .split(main_chunks[1]);
 
         self.handle_action();
 
+        let current_path = Paragraph::new(
+            self.current_directory
+                .as_ref()
+                .unwrap()
+                .root
+                .to_str()
+                .unwrap(),
+        )
+        .style(
+            Style::default()
+                .fg(Color::White)
+                .add_modifier(Modifier::BOLD),
+        );
+        frame.render_widget(current_path, main_chunks[0]);
+
         if let Some(directory) = &mut self.previous_directory {
-            App::render_directory(frame, &chunks[0], directory);
+            App::render_directory(frame, &directories_chunks[0], directory);
         }
 
-        App::render_directory(frame, &chunks[1], self.current_directory.as_mut().unwrap());
+        App::render_directory(
+            frame,
+            &directories_chunks[1],
+            self.current_directory.as_mut().unwrap(),
+        );
 
         if let Some(directory) = &mut self.next_directory {
-            App::render_directory(frame, &chunks[2], directory);
+            App::render_directory(frame, &directories_chunks[2], directory);
         }
 
         self.action = None;
@@ -123,18 +145,21 @@ impl App {
                     ListItem::new(file_name).style(
                         Style::default()
                             .fg(Color::Blue)
+                            .bg(Color::Black)
                             .add_modifier(Modifier::BOLD),
                     )
                 } else if entry.1.is_symlink() {
                     ListItem::new(file_name).style(
                         Style::default()
                             .fg(Color::Cyan)
+                            .bg(Color::Black)
                             .add_modifier(Modifier::BOLD),
                     )
                 } else {
                     ListItem::new(file_name).style(
                         Style::default()
                             .fg(Color::White)
+                            .bg(Color::Black)
                             .add_modifier(Modifier::BOLD),
                     )
                 }
@@ -154,7 +179,8 @@ impl App {
                             .bg(Color::Blue)
                             .fg(Color::Black)
                             .add_modifier(Modifier::BOLD),
-                    );
+                    )
+                    .highlight_symbol(">> ");
             } else if directory.entries[index].1.is_symlink() {
                 list = List::new(items)
                     .block(current_directory_block)
@@ -163,7 +189,8 @@ impl App {
                             .bg(Color::Cyan)
                             .fg(Color::Black)
                             .add_modifier(Modifier::BOLD),
-                    );
+                    )
+                    .highlight_symbol(">> ");
             } else {
                 list = List::new(items)
                     .block(current_directory_block)
@@ -172,7 +199,8 @@ impl App {
                             .bg(Color::White)
                             .fg(Color::Black)
                             .add_modifier(Modifier::BOLD),
-                    );
+                    )
+                    .highlight_symbol(">> ");
             }
         } else {
             list = List::new(items).block(current_directory_block);
