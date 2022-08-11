@@ -11,7 +11,7 @@ impl App {
 
                     self.current_directory = self.previous_directory.take();
 
-                    self.build_previous_dir().unwrap();
+                    self.build_previous_dir();
                 }
             }
             Some(Action::Right) => {
@@ -30,34 +30,16 @@ impl App {
                             .select(Some(0));
                     }
 
-                    if let Err(error) = self.build_next_dir() {
-                        if let std::io::ErrorKind::PermissionDenied = error.kind() {
-                            self.next_directory = None;
-                        } else {
-                            panic!("{}", error);
-                        }
-                    }
+                    self.build_next_dir();
                 }
             }
             Some(Action::Up) => {
                 self.current_directory.as_mut().unwrap().previous();
-                if let Err(error) = self.build_next_dir() {
-                    if let std::io::ErrorKind::PermissionDenied = error.kind() {
-                        self.next_directory = None;
-                    } else {
-                        panic!("{}", error);
-                    }
-                }
+                self.build_next_dir();
             }
             Some(Action::Down) => {
                 self.current_directory.as_mut().unwrap().next();
-                if let Err(error) = self.build_next_dir() {
-                    if let std::io::ErrorKind::PermissionDenied = error.kind() {
-                        self.next_directory = None;
-                    } else {
-                        panic!("{}", error);
-                    }
-                }
+                self.build_next_dir();
             }
             _ => {}
         }

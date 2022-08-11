@@ -5,13 +5,13 @@ use std::fs::FileType;
 use std::path::PathBuf;
 
 impl App {
-    pub fn build_previous_dir(&mut self) -> std::io::Result<()> {
+    pub fn build_previous_dir(&mut self) {
         let current_path: &PathBuf = &self.current_directory.as_ref().unwrap().root;
 
         match current_path.parent() {
             Some(parent) => {
                 // Build previous directory
-                self.previous_directory = Some(Directory::new(&parent.to_path_buf())?);
+                self.previous_directory = Some(Directory::new(&parent.to_path_buf()).unwrap());
 
                 // Get the index of the parent in previous directory
                 let mut parent_index: usize = 0;
@@ -39,11 +39,9 @@ impl App {
                 self.previous_directory = None;
             }
         }
-
-        Ok(())
     }
 
-    pub fn build_next_dir(&mut self) -> std::io::Result<()> {
+    pub fn build_next_dir(&mut self) {
         let current_directory: &Directory = &self.current_directory.as_ref().unwrap();
         let current_entries: &Vec<(PathBuf, FileType)> =
             &self.current_directory.as_ref().unwrap().entries;
@@ -53,12 +51,21 @@ impl App {
                 &current_entries[current_directory.state.selected().unwrap()];
 
             if current_entry.1.is_dir() {
-                self.next_directory = Some(Directory::new(&current_entry.0)?);
+                let next_directory = Directory::new(&current_entry.0);
+
+                match next_directory {
+                    Ok(directory) => self.next_directory = Some(directory),
+                    Err(error) => {
+                        if let std::io::ErrorKind::PermissionDenied = error.kind() {
+                            self.next_directory = None;
+                        } else {
+                            panic!("{}", error);
+                        }
+                    }
+                }
             } else {
                 self.next_directory = None;
             }
         }
-
-        Ok(())
     }
 }

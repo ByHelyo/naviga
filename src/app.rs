@@ -49,15 +49,8 @@ impl Default for App {
             next_directory: None,
         };
 
-        app.build_previous_dir().unwrap();
-
-        if let Err(error) = app.build_next_dir() {
-            if error.kind() == std::io::ErrorKind::PermissionDenied {
-                app.next_directory = None;
-            } else {
-                panic!("{}", error);
-            }
-        };
+        app.build_previous_dir();
+        app.build_next_dir();
 
         app
     }
