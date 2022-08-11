@@ -21,7 +21,7 @@ impl App {
 
                     // if current directory is not empty
                     // Set the list state index to 0
-                    if self.current_directory.as_ref().unwrap().entries.len() > 0 {
+                    if !self.current_directory.as_ref().unwrap().is_empty() {
                         self.current_directory
                             .as_mut()
                             .unwrap()

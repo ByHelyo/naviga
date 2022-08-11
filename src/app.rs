@@ -1,6 +1,5 @@
 mod action;
 pub mod directory;
-mod directory_kind;
 mod utils;
 
 use directory::Directory;
@@ -38,7 +37,7 @@ impl Default for App {
     fn default() -> Self {
         let current_path: PathBuf = env::current_dir().unwrap();
 
-        let mut current_directory: Directory = Directory::new(&current_path).unwrap();
+        let mut current_directory: Directory = Directory::new(&current_path);
         current_directory.state.select(Some(0));
 
         let mut app: App = App {
@@ -106,9 +105,11 @@ impl App {
         );
         frame.render_widget(current_path, main_chunks[0]);
 
-        if let Some(directory) = &mut self.previous_directory {
-            App::render_directory(frame, &directories_chunks[0], directory);
-        }
+        App::render_directory(
+            frame,
+            &directories_chunks[0],
+            self.previous_directory.as_mut().unwrap(),
+        );
 
         App::render_directory(
             frame,
