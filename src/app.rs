@@ -1,11 +1,11 @@
 mod action;
 pub mod directory;
+mod directory_kind;
 mod utils;
 
 use directory::Directory;
-use std::env;
-use std::error;
 use std::path::PathBuf;
+use std::{env, error};
 use tui::backend::Backend;
 use tui::layout::{Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Modifier, Style};

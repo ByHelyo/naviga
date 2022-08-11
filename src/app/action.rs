@@ -1,5 +1,4 @@
-use crate::app::Action;
-use crate::app::App;
+use crate::app::{Action, App};
 
 impl App {
     pub fn handle_action(&mut self) {
