@@ -5,12 +5,14 @@ mod utils;
 use directory::Directory;
 use std::path::PathBuf;
 use std::{env, error};
-use tui::backend::Backend;
-use tui::layout::{Alignment, Constraint, Direction, Layout, Rect};
-use tui::style::{Color, Modifier, Style};
-use tui::terminal::Frame;
-use tui::text::Span;
-use tui::widgets::{Block, List, ListItem, Paragraph};
+use tui::{
+    backend::Backend,
+    layout::{Constraint, Direction, Layout, Rect},
+    style::{Color, Modifier, Style},
+    terminal::Frame,
+    text::{Span, Spans},
+    widgets::{Block, List, ListItem, Paragraph},
+};
 
 /// Application result type.
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
@@ -82,7 +84,9 @@ impl App {
             .constraints(
                 [
                     Constraint::Percentage(20),
+                    Constraint::Length(1),
                     Constraint::Percentage(40),
+                    Constraint::Length(1),
                     Constraint::Percentage(40),
                 ]
                 .as_ref(),
@@ -114,12 +118,12 @@ impl App {
 
         App::render_directory(
             frame,
-            &directories_chunks[1],
+            &directories_chunks[2],
             self.current_directory.as_mut().unwrap(),
         );
 
         if let Some(directory) = &mut self.next_directory {
-            App::render_directory(frame, &directories_chunks[2], directory);
+            App::render_directory(frame, &directories_chunks[4], directory);
         }
 
         self.action = None;
@@ -164,6 +168,7 @@ impl App {
             .iter()
             .map(|entry| {
                 let file_name = entry.0.file_name().unwrap().to_string_lossy();
+                let file_name = Spans::from(vec![Span::raw(" "), Span::raw(file_name)]);
 
                 if entry.1.is_dir() {
                     ListItem::new(file_name).style(
