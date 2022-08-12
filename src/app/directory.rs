@@ -79,4 +79,8 @@ impl Directory {
     pub fn is_empty(&self) -> bool {
         self.entries.len() == 0
     }
+
+    pub fn is_permission_denied(&self) -> bool {
+        self.permission_denied
+    }
 }

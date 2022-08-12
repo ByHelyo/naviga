@@ -46,7 +46,7 @@ impl App {
         let current_entries: &Vec<(PathBuf, FileType)> =
             &self.current_directory.as_ref().unwrap().entries;
 
-        if current_directory.entries.len() > 0 {
+        if !current_directory.entries.is_empty() {
             let current_entry: &(PathBuf, FileType) =
                 &current_entries[current_directory.state.selected().unwrap()];
 

@@ -6,9 +6,10 @@ use directory::Directory;
 use std::path::PathBuf;
 use std::{env, error};
 use tui::backend::Backend;
-use tui::layout::{Constraint, Direction, Layout, Rect};
+use tui::layout::{Alignment, Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Modifier, Style};
 use tui::terminal::Frame;
+use tui::text::Span;
 use tui::widgets::{Block, List, ListItem, Paragraph};
 
 /// Application result type.
@@ -129,6 +130,35 @@ impl App {
         chunk: &Rect,
         directory: &mut Directory,
     ) {
+        if directory.is_permission_denied() {
+            let paragraph = Paragraph::new(Span::styled(
+                "Permission denied",
+                Style::default()
+                    .fg(Color::White)
+                    .bg(Color::Red)
+                    .add_modifier(Modifier::BOLD),
+            ))
+            .style(Style::default().bg(Color::Black))
+            .block(Block::default());
+
+            frame.render_widget(paragraph, *chunk);
+            return;
+        } else if directory.entries.is_empty() {
+            let paragraph = Paragraph::new(Span::styled(
+                "Empty",
+                Style::default()
+                    .fg(Color::White)
+                    .bg(Color::Red)
+                    .add_modifier(Modifier::BOLD),
+            ))
+            .style(Style::default().bg(Color::Black))
+            .block(Block::default());
+
+            frame.render_widget(paragraph, *chunk);
+
+            return;
+        }
+
         let items: Vec<ListItem> = directory
             .entries
             .iter()
@@ -173,8 +203,7 @@ impl App {
                             .bg(Color::Blue)
                             .fg(Color::Black)
                             .add_modifier(Modifier::BOLD),
-                    )
-                    .highlight_symbol("> ");
+                    );
             } else if directory.entries[index].1.is_symlink() {
                 list = List::new(items)
                     .block(current_directory_block)
@@ -183,8 +212,7 @@ impl App {
                             .bg(Color::Cyan)
                             .fg(Color::Black)
                             .add_modifier(Modifier::BOLD),
-                    )
-                    .highlight_symbol("> ");
+                    );
             } else {
                 list = List::new(items)
                     .block(current_directory_block)
@@ -193,8 +221,7 @@ impl App {
                             .bg(Color::White)
                             .fg(Color::Black)
                             .add_modifier(Modifier::BOLD),
-                    )
-                    .highlight_symbol("> ");
+                    );
             }
         } else {
             list = List::new(items).block(current_directory_block);
