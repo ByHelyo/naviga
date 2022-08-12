@@ -1,10 +1,17 @@
 use crate::app::Action;
 use crate::app::{App, AppResult};
 use crossterm::event::{KeyCode, KeyEvent};
+use std::env;
 
 /// Handles the key events and updates the state of [`App`].
 pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
     match key_event.code {
+        // Enter key
+        KeyCode::Enter => {
+            env::set_current_dir(&app.current_directory.as_ref().unwrap().root)
+                .expect(r"Unable to change path");
+            app.running = false;
+        }
         // exit application
         KeyCode::Char('q') => {
             app.running = false;

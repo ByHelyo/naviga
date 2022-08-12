@@ -23,6 +23,7 @@ pub enum Action {
     Right,
     Up,
     Down,
+    Enter,
 }
 
 /// Application.
@@ -110,11 +111,9 @@ impl App {
         );
         frame.render_widget(current_path, main_chunks[0]);
 
-        App::render_directory(
-            frame,
-            &directories_chunks[0],
-            self.previous_directory.as_mut().unwrap(),
-        );
+        if let Some(directory) = &mut self.previous_directory {
+            App::render_directory(frame, &directories_chunks[0], directory);
+        }
 
         App::render_directory(
             frame,
