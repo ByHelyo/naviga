@@ -96,20 +96,11 @@ impl App {
 
         self.handle_action();
 
-        let current_path = Paragraph::new(
-            self.current_directory
-                .as_ref()
-                .unwrap()
-                .root
-                .to_str()
-                .unwrap(),
-        )
-        .style(
-            Style::default()
-                .fg(Color::White)
-                .add_modifier(Modifier::BOLD),
+        App::render_current_directory_path(
+            frame,
+            &main_chunks[0],
+            self.current_directory.as_ref().unwrap(),
         );
-        frame.render_widget(current_path, main_chunks[0]);
 
         if let Some(directory) = &mut self.previous_directory {
             App::render_directory(frame, &directories_chunks[0], directory);
@@ -126,6 +117,28 @@ impl App {
         }
 
         self.action = None;
+    }
+
+    fn render_current_directory_path<B: Backend>(
+        frame: &mut Frame<'_, B>,
+        chunk: &Rect,
+        current_directory: &Directory,
+    ) {
+        let current_path = Paragraph::new(Spans::from(vec![
+            Span::styled(
+                "current directory: ",
+                Style::default()
+                    .fg(Color::Green)
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::styled(
+                current_directory.root.to_str().unwrap(),
+                Style::default()
+                    .fg(Color::Blue)
+                    .add_modifier(Modifier::BOLD),
+            ),
+        ]));
+        frame.render_widget(current_path, *chunk);
     }
 
     fn render_directory<B: Backend>(
