@@ -141,7 +141,6 @@ impl App {
                     .bg(Color::Red)
                     .add_modifier(Modifier::BOLD),
             ))
-            .style(Style::default().bg(Color::Black))
             .block(Block::default());
 
             frame.render_widget(paragraph, *chunk);
@@ -154,7 +153,6 @@ impl App {
                     .bg(Color::Red)
                     .add_modifier(Modifier::BOLD),
             ))
-            .style(Style::default().bg(Color::Black))
             .block(Block::default());
 
             frame.render_widget(paragraph, *chunk);
@@ -173,21 +171,18 @@ impl App {
                     ListItem::new(file_name).style(
                         Style::default()
                             .fg(Color::Blue)
-                            .bg(Color::Black)
                             .add_modifier(Modifier::BOLD),
                     )
                 } else if entry.1.is_symlink() {
                     ListItem::new(file_name).style(
                         Style::default()
                             .fg(Color::Cyan)
-                            .bg(Color::Black)
                             .add_modifier(Modifier::BOLD),
                     )
                 } else {
                     ListItem::new(file_name).style(
                         Style::default()
                             .fg(Color::White)
-                            .bg(Color::Black)
                             .add_modifier(Modifier::BOLD),
                     )
                 }
