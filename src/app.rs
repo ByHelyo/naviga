@@ -1,8 +1,9 @@
 mod action;
-pub mod directory;
+mod directory;
 mod utils;
 
 use directory::Directory;
+use std::borrow::Cow;
 use std::path::PathBuf;
 use std::{env, error};
 use tui::{
@@ -42,7 +43,7 @@ impl Default for App {
         let current_path: PathBuf = env::current_dir().unwrap();
 
         let mut current_directory: Directory = Directory::new(&current_path);
-        current_directory.state.select(Some(0));
+        current_directory.set_state(Some(0));
 
         let mut app: App = App {
             running: true,
@@ -75,12 +76,12 @@ impl App {
         // - https://docs.rs/tui/0.16.0/tui/widgets/index.html
         // - https://github.com/fdehau/tui-rs/tree/v0.16.0/examples
 
-        let main_chunks = Layout::default()
+        let main_chunks: Vec<Rect> = Layout::default()
             .direction(Direction::Vertical)
             .constraints([Constraint::Length(1), Constraint::Min(1)].as_ref())
             .split(frame.size());
 
-        let directories_chunks = Layout::default()
+        let directories_chunks: Vec<Rect> = Layout::default()
             .direction(Direction::Horizontal)
             .constraints(
                 [
@@ -124,7 +125,7 @@ impl App {
         chunk: &Rect,
         current_directory: &Directory,
     ) {
-        let current_path = Paragraph::new(Spans::from(vec![
+        let current_path: Paragraph = Paragraph::new(Spans::from(vec![
             Span::styled(
                 "current directory: ",
                 Style::default()
@@ -132,7 +133,7 @@ impl App {
                     .add_modifier(Modifier::BOLD),
             ),
             Span::styled(
-                current_directory.root.to_str().unwrap(),
+                current_directory.get_root().to_str().unwrap(),
                 Style::default()
                     .fg(Color::Blue)
                     .add_modifier(Modifier::BOLD),
@@ -147,7 +148,7 @@ impl App {
         directory: &mut Directory,
     ) {
         if directory.is_permission_denied() {
-            let paragraph = Paragraph::new(Span::styled(
+            let paragraph: Paragraph = Paragraph::new(Span::styled(
                 "Permission denied",
                 Style::default()
                     .fg(Color::White)
@@ -158,7 +159,7 @@ impl App {
 
             frame.render_widget(paragraph, *chunk);
             return;
-        } else if directory.entries.is_empty() {
+        } else if directory.is_empty() {
             let paragraph = Paragraph::new(Span::styled(
                 "Empty",
                 Style::default()
@@ -177,7 +178,7 @@ impl App {
             .entries
             .iter()
             .map(|entry| {
-                let file_name = entry.0.file_name().unwrap().to_string_lossy();
+                let file_name: Cow<'_, str> = entry.0.file_name().unwrap().to_string_lossy();
                 let file_name = Spans::from(vec![Span::raw(" "), Span::raw(file_name)]);
 
                 if entry.1.is_dir() {
@@ -206,8 +207,8 @@ impl App {
 
         let list: List;
 
-        if let Some(index) = directory.state.selected() {
-            if directory.entries[index].1.is_dir() {
+        if let Some(index) = directory.get_state() {
+            if directory.get_entries()[index].1.is_dir() {
                 list = List::new(items)
                     .block(current_directory_block)
                     .highlight_style(
@@ -216,7 +217,7 @@ impl App {
                             .fg(Color::Black)
                             .add_modifier(Modifier::BOLD),
                     );
-            } else if directory.entries[index].1.is_symlink() {
+            } else if directory.get_entries()[index].1.is_symlink() {
                 list = List::new(items)
                     .block(current_directory_block)
                     .highlight_style(

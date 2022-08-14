@@ -8,7 +8,7 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
     match key_event.code {
         // Enter key
         KeyCode::Enter => {
-            env::set_current_dir(&app.current_directory.as_ref().unwrap().root)
+            env::set_current_dir(&app.current_directory.as_ref().unwrap().get_root())
                 .expect(r"Unable to change path");
             app.running = false;
         }

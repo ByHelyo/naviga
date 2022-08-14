@@ -6,7 +6,7 @@ use tui::widgets::ListState;
 #[derive(Debug)]
 pub struct Directory {
     permission_denied: bool,
-    pub root: PathBuf,
+    root: PathBuf,
     pub state: ListState,
     pub entries: Vec<(PathBuf, FileType)>,
 }
@@ -33,6 +33,30 @@ impl Directory {
                 entries: Vec::new(),
             }
         }
+    }
+
+    pub fn get_root(&self) -> &PathBuf {
+        &self.root
+    }
+
+    pub fn get_entries(&self) -> &Vec<(PathBuf, FileType)> {
+        &self.entries
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.entries.len() == 0
+    }
+
+    pub fn set_state(&mut self, index: Option<usize>) {
+        self.state.select(index);
+    }
+
+    pub fn get_state(&self) -> Option<usize> {
+        self.state.selected()
+    }
+
+    pub fn is_permission_denied(&self) -> bool {
+        self.permission_denied
     }
 
     fn build_entries(dir_path: &PathBuf) -> std::io::Result<Vec<(PathBuf, FileType)>> {
@@ -74,13 +98,5 @@ impl Directory {
         };
 
         self.state.select(Some(i));
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.entries.len() == 0
-    }
-
-    pub fn is_permission_denied(&self) -> bool {
-        self.permission_denied
     }
 }

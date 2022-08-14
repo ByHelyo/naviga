@@ -6,7 +6,7 @@ use std::path::PathBuf;
 
 impl App {
     pub fn build_previous_dir(&mut self) {
-        let current_path: &PathBuf = &self.current_directory.as_ref().unwrap().root;
+        let current_path: &PathBuf = &self.current_directory.as_ref().unwrap().get_root();
 
         match current_path.parent() {
             Some(parent) => {
@@ -20,7 +20,7 @@ impl App {
                     .previous_directory
                     .as_ref()
                     .unwrap()
-                    .entries
+                    .get_entries()
                     .iter()
                     .enumerate()
                 {
@@ -32,8 +32,7 @@ impl App {
                 self.previous_directory
                     .as_mut()
                     .unwrap()
-                    .state
-                    .select(Some(parent_index));
+                    .set_state(Some(parent_index));
             }
             None => {
                 self.previous_directory = None;
@@ -44,11 +43,11 @@ impl App {
     pub fn build_next_dir(&mut self) {
         let current_directory: &Directory = &self.current_directory.as_ref().unwrap();
         let current_entries: &Vec<(PathBuf, FileType)> =
-            &self.current_directory.as_ref().unwrap().entries;
+            &self.current_directory.as_ref().unwrap().get_entries();
 
-        if !current_directory.entries.is_empty() {
+        if !current_directory.is_empty() {
             let current_entry: &(PathBuf, FileType) =
-                &current_entries[current_directory.state.selected().unwrap()];
+                &current_entries[current_directory.get_state().unwrap()];
 
             if current_entry.1.is_dir() {
                 self.next_directory = Some(Directory::new(&current_entry.0));
