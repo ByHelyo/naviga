@@ -93,24 +93,22 @@ impl App {
 
         self.handle_action();
 
-        Directory::render_current_directory_path(
-            frame,
-            &main_chunks[0],
-            self.current_directory.as_ref().unwrap(),
-        );
+        self.current_directory
+            .as_ref()
+            .unwrap()
+            .render_current_directory_path(frame, &main_chunks[0]);
 
         if let Some(directory) = &mut self.previous_directory {
-            Directory::render_directory(frame, &directories_chunks[0], directory);
+            directory.render_directory(frame, &directories_chunks[0]);
         }
 
-        Directory::render_directory(
-            frame,
-            &directories_chunks[2],
-            self.current_directory.as_mut().unwrap(),
-        );
+        self.current_directory
+            .as_mut()
+            .unwrap()
+            .render_directory(frame, &directories_chunks[2]);
 
         if let Some(directory) = &mut self.next_directory {
-            Directory::render_directory(frame, &directories_chunks[4], directory);
+            directory.render_directory(frame, &directories_chunks[4]);
         }
 
         self.action = None;

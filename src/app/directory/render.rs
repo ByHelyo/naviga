@@ -11,9 +11,9 @@ use tui::{
 
 impl Directory {
     pub fn render_current_directory_path<B: Backend>(
+        &self,
         frame: &mut Frame<'_, B>,
         chunk: &Rect,
-        current_directory: &Directory,
     ) {
         let current_path: Paragraph = Paragraph::new(Spans::from(vec![
             Span::styled(
@@ -23,7 +23,7 @@ impl Directory {
                     .add_modifier(Modifier::BOLD),
             ),
             Span::styled(
-                current_directory.get_root().to_str().unwrap(),
+                self.root.to_str().unwrap(),
                 Style::default()
                     .fg(Color::Blue)
                     .add_modifier(Modifier::BOLD),
@@ -32,12 +32,8 @@ impl Directory {
         frame.render_widget(current_path, *chunk);
     }
 
-    pub fn render_directory<B: Backend>(
-        frame: &mut Frame<'_, B>,
-        chunk: &Rect,
-        directory: &mut Directory,
-    ) {
-        if directory.is_permission_denied() {
+    pub fn render_directory<B: Backend>(&mut self, frame: &mut Frame<'_, B>, chunk: &Rect) {
+        if self.is_permission_denied() {
             let paragraph: Paragraph = Paragraph::new(Span::styled(
                 "Permission denied",
                 Style::default()
@@ -49,7 +45,7 @@ impl Directory {
 
             frame.render_widget(paragraph, *chunk);
             return;
-        } else if directory.is_empty() {
+        } else if self.is_empty() {
             let paragraph = Paragraph::new(Span::styled(
                 "Empty",
                 Style::default()
@@ -64,7 +60,7 @@ impl Directory {
             return;
         }
 
-        let items: Vec<ListItem> = directory
+        let items: Vec<ListItem> = self
             .entries
             .iter()
             .map(|entry| {
@@ -97,8 +93,8 @@ impl Directory {
 
         let list: List;
 
-        if let Some(index) = directory.get_state() {
-            if directory.get_entries()[index].1.is_dir() {
+        if let Some(index) = self.get_state() {
+            if self.entries[index].1.is_dir() {
                 list = List::new(items)
                     .block(current_directory_block)
                     .highlight_style(
@@ -107,7 +103,7 @@ impl Directory {
                             .fg(Color::Black)
                             .add_modifier(Modifier::BOLD),
                     );
-            } else if directory.get_entries()[index].1.is_symlink() {
+            } else if self.entries[index].1.is_symlink() {
                 list = List::new(items)
                     .block(current_directory_block)
                     .highlight_style(
@@ -130,6 +126,6 @@ impl Directory {
             list = List::new(items).block(current_directory_block);
         }
 
-        frame.render_stateful_widget(list, *chunk, &mut directory.state);
+        frame.render_stateful_widget(list, *chunk, &mut self.state);
     }
 }
