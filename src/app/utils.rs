@@ -6,7 +6,7 @@ use std::path::PathBuf;
 
 impl App {
     pub fn build_previous_dir(&mut self) {
-        let current_path: &PathBuf = &self.current_directory.as_ref().unwrap().get_root();
+        let current_path: &PathBuf = self.current_directory.as_ref().unwrap().get_root();
 
         match current_path.parent() {
             Some(parent) => {
@@ -41,9 +41,9 @@ impl App {
     }
 
     pub fn build_next_dir(&mut self) {
-        let current_directory: &Directory = &self.current_directory.as_ref().unwrap();
+        let current_directory: &Directory = self.current_directory.as_ref().unwrap();
         let current_entries: &Vec<(PathBuf, FileType)> =
-            &self.current_directory.as_ref().unwrap().get_entries();
+            self.current_directory.as_ref().unwrap().get_entries();
 
         if !current_directory.is_empty() {
             let current_entry: &(PathBuf, FileType) =

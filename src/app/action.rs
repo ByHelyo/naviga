@@ -1,4 +1,6 @@
 use crate::app::{Action, App};
+use std::fs::File;
+use std::io::Write;
 
 impl App {
     pub fn handle_action(&mut self) {
@@ -39,6 +41,21 @@ impl App {
                     self.current_directory.as_mut().unwrap().next();
                     self.build_next_dir();
                 }
+            }
+            Some(Action::Enter) => {
+                let mut file = File::create(dirs::home_dir().unwrap().join("naviga.txt")).unwrap();
+                write!(
+                    file,
+                    "cd \"{}\"",
+                    self.current_directory
+                        .as_ref()
+                        .unwrap()
+                        .get_root()
+                        .to_str()
+                        .unwrap()
+                )
+                .unwrap();
+                self.running = false;
             }
             _ => {}
         }
