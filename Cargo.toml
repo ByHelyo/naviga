@@ -3,6 +3,10 @@ name = "naviga"
 version = "0.1.0"
 authors = ["Franck Hu <franck.hu@epita.fr>"]
 edition = "2021"
+license = "MIT"
+description = "Naviga helps users navigate easily through directories"
+repository = "https://github.com/ByHelyo/naviga"
+readme = "README.md"
 
 [dependencies]
 tui = "0.18"
