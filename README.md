@@ -15,19 +15,26 @@ Naviga helps users navigate easily through directories. Naviga's design is inspi
 $ cargo install naviga
 ```
 
-A program can't change the current directory as a process can only affect its own environment. A shell function must be added in your shell configuration file (.bashrc, .zshrc).
+A program can't change the current directory as a process can only affect its own environment. A shell function must be added in your shell configuration file (.bashrc, .zshrc) and then restart the terminal.
 
 > I agree, a shell function is not the smartest way.
 
 ```
 function nav() {
     naviga
-    . ~/naviga.txt
-    rm ~/naviga.txt
+
+    if [ -f "$HOME/naviga.sh" ]; then
+        . ~/naviga.sh
+        rm ~/naviga.sh
+    fi
 }
 
 export function nav
 ```
+
+## Quick start
+
+Launch **naviga** with **nav** (the shell function defined above). Use the arrow keys or `h` `i` `j` `k` to navigate, `Enter` to jump into the selected directory, and `q` to exit.
 
 ## Uninstallation
 

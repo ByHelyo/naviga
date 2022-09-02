@@ -43,7 +43,7 @@ impl App {
                 }
             }
             Some(Action::Enter) => {
-                let mut file = File::create(dirs::home_dir().unwrap().join("naviga.txt")).unwrap();
+                let mut file = File::create(dirs::home_dir().unwrap().join("naviga.sh")).unwrap();
                 write!(
                     file,
                     "cd \"{}\"",
