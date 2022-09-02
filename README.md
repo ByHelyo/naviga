@@ -15,10 +15,9 @@ Naviga helps users navigate easily through directories. Naviga's design is inspi
 $ cargo install naviga
 ```
 
-A shell function must be added in your shell configuration file (.bashrc, .zshrc).
+A program can't change the current directory as a process can only affect its own environment. A shell function must be added in your shell configuration file (.bashrc, .zshrc).
 
-> A program can´t change the current directory as a process can only affect its own environment.
-> I agree, it's not the smartest way to do it.
+> I agree, a shell function is not the smartest way.
 
 ```
 function nav() {
