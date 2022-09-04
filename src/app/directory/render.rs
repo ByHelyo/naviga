@@ -1,4 +1,4 @@
-use crate::app::directory::Directory;
+use crate::app::{directory::Directory, entry::Entry};
 use std::borrow::Cow;
 use tui::{
     backend::Backend,
@@ -44,6 +44,7 @@ impl Directory {
             .block(Block::default());
 
             frame.render_widget(paragraph, *chunk);
+
             return;
         } else if self.is_empty() {
             let paragraph = Paragraph::new(Span::styled(
@@ -60,20 +61,21 @@ impl Directory {
             return;
         }
 
+        // Build the items
         let items: Vec<ListItem> = self
             .entries
             .iter()
-            .map(|entry| {
-                let file_name: Cow<'_, str> = entry.0.file_name().unwrap().to_string_lossy();
+            .filter(|entry: &&Entry| entry.is_visible())
+            .map(|entry: &Entry| {
+                let file_name: Cow<str> = entry.get_filename();
                 let file_name = Spans::from(vec![Span::raw(" "), Span::raw(file_name)]);
-
-                if entry.1.is_dir() {
+                if entry.is_dir() {
                     ListItem::new(file_name).style(
                         Style::default()
                             .fg(Color::Blue)
                             .add_modifier(Modifier::BOLD),
                     )
-                } else if entry.1.is_symlink() {
+                } else if entry.is_symlink() {
                     ListItem::new(file_name).style(
                         Style::default()
                             .fg(Color::Cyan)
@@ -89,12 +91,13 @@ impl Directory {
             })
             .collect();
 
+        // Render
         let current_directory_block = Block::default();
 
         let list: List;
 
-        if let Some(index) = self.get_state() {
-            if self.entries[index].1.is_dir() {
+        if let Some(entry) = self.get_selected_entry() {
+            if entry.is_dir() {
                 list = List::new(items)
                     .block(current_directory_block)
                     .highlight_style(
@@ -103,7 +106,7 @@ impl Directory {
                             .fg(Color::Black)
                             .add_modifier(Modifier::BOLD),
                     );
-            } else if self.entries[index].1.is_symlink() {
+            } else if entry.is_symlink() {
                 list = List::new(items)
                     .block(current_directory_block)
                     .highlight_style(

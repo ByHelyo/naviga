@@ -1,7 +1,6 @@
 use crate::app::App;
 
-use crate::app::directory::Directory;
-use std::fs::FileType;
+use crate::app::{directory::Directory, entry::Entry};
 use std::path::PathBuf;
 
 impl App {
@@ -14,20 +13,12 @@ impl App {
                 self.previous_directory = Some(Directory::new(&parent.to_path_buf()));
 
                 // Get the index of the parent in previous directory
-                let mut parent_index: usize = 0;
-
-                for (index, entry) in self
+                let parent_index: usize = self
                     .previous_directory
                     .as_ref()
                     .unwrap()
-                    .get_entries()
-                    .iter()
-                    .enumerate()
-                {
-                    if entry.1.is_dir() && &entry.0 == current_path {
-                        parent_index = index;
-                    }
-                }
+                    .get_entry_from_path(current_path)
+                    .unwrap();
 
                 self.previous_directory
                     .as_mut()
@@ -42,15 +33,13 @@ impl App {
 
     pub fn build_next_dir(&mut self) {
         let current_directory: &Directory = self.current_directory.as_ref().unwrap();
-        let current_entries: &Vec<(PathBuf, FileType)> =
-            self.current_directory.as_ref().unwrap().get_entries();
 
         if !current_directory.is_empty() {
-            let current_entry: &(PathBuf, FileType) =
-                &current_entries[current_directory.get_state().unwrap()];
+            let current_entry: &Entry =
+                current_directory.nth_visible(current_directory.get_state().unwrap());
 
-            if current_entry.1.is_dir() {
-                self.next_directory = Some(Directory::new(&current_entry.0));
+            if current_entry.is_dir() {
+                self.next_directory = Some(Directory::new(current_entry.get_path()));
             } else {
                 self.next_directory = None;
             }

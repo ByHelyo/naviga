@@ -1,10 +1,10 @@
 mod action;
 mod directory;
+mod entry;
 mod utils;
 
 use directory::Directory;
-use std::path::PathBuf;
-use std::{env, error};
+use std::{env, error, path::PathBuf};
 use tui::{
     backend::Backend,
     layout::{Constraint, Direction, Layout, Rect},

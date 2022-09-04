@@ -1,8 +1,7 @@
 mod render;
 mod utils;
 
-use std::fs::FileType;
-use std::io;
+use crate::app::entry::Entry;
 use std::path::PathBuf;
 use tui::widgets::ListState;
 
@@ -11,7 +10,8 @@ pub struct Directory {
     permission_denied: bool,
     root: PathBuf,
     state: ListState,
-    entries: Vec<(PathBuf, FileType)>,
+    visible_entries: usize,
+    entries: Vec<Entry>,
 }
 
 impl Directory {
@@ -19,14 +19,20 @@ impl Directory {
         let mut state: ListState = ListState::default();
         state.select(None);
 
-        let entries: io::Result<Vec<(PathBuf, FileType)>> = Directory::build_entries(dir_path);
+        let entries: std::io::Result<Vec<Entry>> = Directory::build_entries(dir_path);
 
         if let Ok(entries) = entries {
+            let visible_entries: usize = entries
+                .iter()
+                .filter(|entry: &&Entry| entry.is_visible())
+                .count();
+
             Directory {
                 permission_denied: false,
                 root: dir_path.to_path_buf(),
                 state,
                 entries,
+                visible_entries,
             }
         } else {
             Directory {
@@ -34,6 +40,7 @@ impl Directory {
                 root: dir_path.to_path_buf(),
                 state,
                 entries: Vec::new(),
+                visible_entries: 0,
             }
         }
     }
@@ -42,7 +49,7 @@ impl Directory {
         &self.root
     }
 
-    pub fn get_entries(&self) -> &Vec<(PathBuf, FileType)> {
+    pub fn get_entries(&self) -> &Vec<Entry> {
         &self.entries
     }
 
