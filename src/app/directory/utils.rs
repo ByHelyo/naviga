@@ -1,7 +1,9 @@
 use crate::app::{directory::Directory, entry::Entry};
-use std::cmp::Ordering;
-use std::fs::{self, DirEntry};
-use std::path::PathBuf;
+use std::{
+    cmp::Ordering,
+    fs::{self, DirEntry},
+    path::PathBuf,
+};
 
 impl Directory {
     pub fn build_entries(dir_path: &PathBuf) -> std::io::Result<Vec<Entry>> {

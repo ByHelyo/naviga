@@ -1,6 +1,5 @@
 use crate::app::{Action, App};
-use std::fs::File;
-use std::io::Write;
+use std::{fs::File, io::Write};
 
 impl App {
     pub fn handle_action(&mut self) {

@@ -1,6 +1,8 @@
-use std::borrow::Cow;
-use std::fs::{DirEntry, FileType};
-use std::path::PathBuf;
+use std::{
+    borrow::Cow,
+    fs::{DirEntry, FileType},
+    path::PathBuf,
+};
 
 #[derive(Debug)]
 pub struct Entry {

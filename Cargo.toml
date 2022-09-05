@@ -1,6 +1,6 @@
 [package]
 name = "naviga"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Franck Hu <franck.hu@epita.fr>"]
 edition = "2021"
 license = "MIT"

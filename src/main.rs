@@ -1,10 +1,11 @@
-use naviga::app::{App, AppResult};
-use naviga::event::{Event, EventHandler};
-use naviga::handler::handle_key_events;
-use naviga::tui::Tui;
+use naviga::{
+    app::{App, AppResult},
+    event::{Event, EventHandler},
+    handler::handle_key_events,
+    tui::Tui,
+};
 use std::io;
-use tui::backend::CrosstermBackend;
-use tui::Terminal;
+use tui::{backend::CrosstermBackend, Terminal};
 
 fn main() -> AppResult<()> {
     // Create an application.

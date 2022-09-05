@@ -34,33 +34,41 @@ impl Directory {
 
     pub fn render_directory<B: Backend>(&mut self, frame: &mut Frame<'_, B>, chunk: &Rect) {
         if self.is_permission_denied() {
-            let paragraph: Paragraph = Paragraph::new(Span::styled(
-                "Permission denied",
-                Style::default()
-                    .fg(Color::White)
-                    .bg(Color::Red)
-                    .add_modifier(Modifier::BOLD),
-            ))
-            .block(Block::default());
-
-            frame.render_widget(paragraph, *chunk);
-
-            return;
+            self.render_permission_denied(frame, chunk);
         } else if self.is_empty() {
-            let paragraph = Paragraph::new(Span::styled(
-                "Empty",
-                Style::default()
-                    .fg(Color::White)
-                    .bg(Color::Red)
-                    .add_modifier(Modifier::BOLD),
-            ))
-            .block(Block::default());
-
-            frame.render_widget(paragraph, *chunk);
-
-            return;
+            self.render_empty_dir(frame, chunk);
+        } else {
+            self.render_normal_dir(frame, chunk);
         }
+    }
 
+    fn render_permission_denied<B: Backend>(&mut self, frame: &mut Frame<'_, B>, chunk: &Rect) {
+        let paragraph: Paragraph = Paragraph::new(Span::styled(
+            "Permission denied",
+            Style::default()
+                .fg(Color::White)
+                .bg(Color::Red)
+                .add_modifier(Modifier::BOLD),
+        ))
+        .block(Block::default());
+
+        frame.render_widget(paragraph, *chunk);
+    }
+
+    fn render_empty_dir<B: Backend>(&mut self, frame: &mut Frame<'_, B>, chunk: &Rect) {
+        let paragraph = Paragraph::new(Span::styled(
+            "Empty",
+            Style::default()
+                .fg(Color::White)
+                .bg(Color::Red)
+                .add_modifier(Modifier::BOLD),
+        ))
+        .block(Block::default());
+
+        frame.render_widget(paragraph, *chunk);
+    }
+
+    fn render_normal_dir<B: Backend>(&mut self, frame: &mut Frame<'_, B>, chunk: &Rect) {
         // Build the items
         let items: Vec<ListItem> = self
             .entries

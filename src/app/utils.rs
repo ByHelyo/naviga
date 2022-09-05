@@ -1,6 +1,4 @@
-use crate::app::App;
-
-use crate::app::{directory::Directory, entry::Entry};
+use crate::app::{directory::Directory, entry::Entry, App};
 use std::path::PathBuf;
 
 impl App {

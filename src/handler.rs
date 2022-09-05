@@ -1,5 +1,4 @@
-use crate::app::Action;
-use crate::app::{App, AppResult};
+use crate::app::{Action, App, AppResult};
 use crossterm::event::{KeyCode, KeyEvent};
 
 /// Handles the key events and updates the state of [`App`].
