@@ -2,7 +2,7 @@
 
 <div align="center">
   <img width="600"
-       src="https://user-images.githubusercontent.com/70762494/188036406-93ed18a4-04eb-4d6e-a3ff-c1305431e7bd.png">
+       src="https://user-images.githubusercontent.com/70762494/188735570-3e066397-5635-4438-ab88-bf17b2473543.png">
 </div>
 
 ## About
@@ -15,7 +15,7 @@ Naviga helps users navigate easily through directories. Naviga's design is inspi
 $ cargo install naviga
 ```
 
-A program can't change the current directory as a process can only affect its own environment. A shell function must be added in your shell configuration file (.bashrc, .zshrc) and then restart the terminal.
+A program can't change the current directory as a process can only affect its own environment. A shell function must be added in your shell configuration file (.bashrc, .zshrc) the terminal must be restarted.
 
 > I agree, a shell function is not the smartest way.
 
