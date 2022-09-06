@@ -21,26 +21,37 @@ impl Directory {
 
         let entries: std::io::Result<Vec<Entry>> = Directory::build_entries(dir_path);
 
-        if let Ok(entries) = entries {
-            let visible_entries: usize = entries
-                .iter()
-                .filter(|entry: &&Entry| entry.is_visible())
-                .count();
+        match entries {
+            Ok(entries) => {
+                let visible_entries: usize = entries
+                    .iter()
+                    .filter(|entry: &&Entry| entry.is_visible())
+                    .count();
 
-            Directory {
-                permission_denied: false,
-                root: dir_path.to_path_buf(),
-                state,
-                entries,
-                visible_entries,
+                Directory {
+                    permission_denied: false,
+                    root: dir_path.to_path_buf(),
+                    state,
+                    entries,
+                    visible_entries,
+                }
             }
-        } else {
-            Directory {
-                permission_denied: true,
-                root: dir_path.to_path_buf(),
-                state,
-                entries: Vec::new(),
-                visible_entries: 0,
+            Err(error) => {
+                if error.kind() == std::io::ErrorKind::PermissionDenied {
+                    Directory {
+                        permission_denied: true,
+                        root: dir_path.to_path_buf(),
+                        state,
+                        entries: Vec::new(),
+                        visible_entries: 0,
+                    }
+                } else {
+                    panic!(
+                        "An error occured reading the directory {}: {}",
+                        dir_path.display(),
+                        error
+                    );
+                }
             }
         }
     }
