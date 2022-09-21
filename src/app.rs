@@ -12,7 +12,7 @@ use tui::{
 };
 
 /// Application result type.
-pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
+pub type AppResult<T> = Result<T, Box<dyn error::Error>>;
 
 #[derive(Debug)]
 pub enum Action {

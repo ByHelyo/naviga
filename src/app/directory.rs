@@ -47,7 +47,7 @@ impl Directory {
                     }
                 } else {
                     panic!(
-                        "An error occured reading the directory {}: {}",
+                        "An error occurred reading the directory {}: {}",
                         dir_path.display(),
                         error
                     );
