@@ -1,7 +1,7 @@
 [package]
 name = "naviga"
 version = "0.1.4"
-authors = ["Franck Hu <franck.hu@epita.fr>"]
+authors = ["ByHelyo <byhelyo@gmail.com>"]
 edition = "2021"
 license = "MIT"
 description = "Naviga helps users navigate easily through directories"
